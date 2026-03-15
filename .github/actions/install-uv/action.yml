@@ -1,0 +1,9 @@
+name: "Install UV"
+description: "GitHub Action to install uv"
+runs:
+  using: composite
+  steps:
+    - name: "Install UV"
+      shell: bash
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh

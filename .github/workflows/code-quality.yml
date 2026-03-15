@@ -1,0 +1,65 @@
+name: Python Code Quality
+
+on:
+  push:
+  pull_request:
+    branches: ["main"] # only PRs targeting main
+
+jobs:
+  # Ensure the uv.lock file is up to date
+  lock_file:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/install-uv
+      - run: uv lock --locked
+  linting:
+    runs-on: ubuntu-latest
+    needs: [lock_file]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/install-uv
+      - run: uvx ruff==0.15.6 check .
+  formatting:
+    runs-on: ubuntu-latest
+    needs: [lock_file]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/install-uv
+      - run: uvx ruff==0.15.6 format --check .
+  # TODO : syncing with .pre-commit-config.yaml
+  type_consistency:
+    runs-on: ubuntu-latest
+    needs: [lock_file]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/install-uv
+      - run: uv run ty check .
+  tests:
+    runs-on: ubuntu-latest
+    needs: [lock_file]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/install-uv
+      - run: uv run pytest -v --durations=0 --cov
+      # TODO : create a codecov account and sync the github repo
+      # - name: Upload Coverage to Codecov
+      #   uses: codecov/codecov-action@v4
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+  deploy:
+    # Only runs on push (not PR) AND only for main
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: [linting, formatting, type_consistency, tests]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # <-- Required for Clever Cloud deployment
+      - uses: 47ng/actions-clever-cloud@v2.1.0
+        with:
+          alias: Hadith-REST-API
+          sameCommitPolicy: restart
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
