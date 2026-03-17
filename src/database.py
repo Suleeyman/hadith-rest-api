@@ -8,6 +8,8 @@ from src.core.settings import settings
 
 logger = logging.getLogger(__name__)
 
+# logging.getLogger("pymongo.command").setLevel(logging.DEBUG)
+
 
 class AppDatabase:
     client: MongoClient | None = None

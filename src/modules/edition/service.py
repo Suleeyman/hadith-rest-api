@@ -1,6 +1,6 @@
 from bson import ObjectId
 
-from src.modules.common.model import PyObjectId
+from src.core.schema import PyObjectId
 from src.modules.edition.dto.edition_with_books import EditionWithBooks
 from src.modules.edition.exception import EditionNotFoundError
 from src.modules.edition.model import Edition

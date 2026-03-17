@@ -1,5 +1,9 @@
+from typing import Any
+
 from bson import ObjectId
 from pymongo.database import Database
+
+from src.core.pagination import paginate_collection
 
 # logging.getLogger("pymongo.command").setLevel(logging.DEBUG)
 
@@ -34,6 +38,19 @@ class BookRepository:
 
     def find_all(self):
         return list(self.collection.find({}))
+
+    def paginate(
+        self,
+        page: int,
+        page_size: int,
+        filter_query: dict[str, Any],
+    ) -> dict[str, Any]:
+        return paginate_collection(
+            collection=self.collection,
+            page=page,
+            page_size=page_size,
+            filter_query=filter_query,
+        )
 
     def find_one_by_id(self, document_id: ObjectId):
         return self.collection.find_one({"_id": document_id})

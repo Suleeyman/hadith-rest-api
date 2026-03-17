@@ -1,10 +1,13 @@
+from typing import Any
+
 from bson import ObjectId
 
+from src.core.schema import PyObjectId
 from src.modules.book.dto.book_with_edition import BookWithEdition
 from src.modules.book.exception import BookNotFoundError
 from src.modules.book.model import Book
 from src.modules.book.repository import BookRepository
-from src.modules.common.model import PyObjectId
+from src.modules.book.schema import FilterBooksQueries
 
 
 class BookService:
@@ -15,6 +18,13 @@ class BookService:
         self,
     ) -> list[Book]:
         return list(self.repository.find_all())
+
+    def get_books_paginated(
+        self, page: int, page_size: int, filter_query: FilterBooksQueries
+    ) -> dict[str, Any]:
+        return self.repository.paginate(
+            page=page, page_size=page_size, filter_query=filter_query.to_mongo()
+        )
 
     def get_book_by_id(self, book_id: PyObjectId) -> BookWithEdition:
         book = self.repository.find_one_by_id_join_edition(ObjectId(book_id))

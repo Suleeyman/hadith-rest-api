@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     app_name: str = "Hadislam Multilingual REST API"
-    app_summary: str = "Multilingual REST API for most popular hadith editions : Sahih Al-Bukhari, Sahih Muslim, Jami At-Tirmidhi, Sunan Abu Dawud, Muwatta Malik, and many more. "
+    app_summary: str = "Multilingual REST API for most popular hadith editions : Sahih Al-Bukhari, Sahih Muslim, Jami At-Tirmidhi, Sunan Abu Dawud, Muwatta Malik, and much more. "
     app_description: str = """
 # 📖 Hadislam REST API
 

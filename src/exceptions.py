@@ -1,6 +1,6 @@
 from typing import Any
 
-from src.modules.common.model import Resource
+from src.core.schema import Resource
 
 
 class ResourceNotFoundError(Exception):

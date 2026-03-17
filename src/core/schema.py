@@ -49,3 +49,15 @@ class ErrorResponse(BaseModel):
     code: int
     message: str
     details: dict[str, str] | str | None = None
+
+
+class PaginatedResponse[T](BaseModel):
+    total: int
+    page: int
+    page_size: int
+    items: list[T]
+
+
+class PaginationParams(BaseModel):
+    page: int
+    page_size: int

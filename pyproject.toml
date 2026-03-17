@@ -1,7 +1,7 @@
 [project]
 name = "hadislam-org"
 version = "0.1.0"
-description = "Multilingual REST API for most popular hadith editions : Sahih Al-Bukhari, Sahih Muslim, Jami At-Tirmidhi, Sunan Abu Dawud, Muwatta Malik, and many more."
+description = "Multilingual REST API for most popular hadith editions : Sahih Al-Bukhari, Sahih Muslim, Jami At-Tirmidhi, Sunan Abu Dawud, Muwatta Malik, and much more."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

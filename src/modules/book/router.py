@@ -5,10 +5,15 @@ from src.core.openapi.openapi_response_annotation import (
     not_found_response_annotation,
     not_found_responses_annotation,
 )
-from src.modules.book.dependencies import BookIndex, BookServiceDepends
+from src.core.pagination import PaginationParamsDepends
+from src.core.schema import PaginatedResponse, PyObjectId, Resource
+from src.modules.book.dependencies import (
+    BookIndex,
+    BookServiceDepends,
+    FilterBooksQueryDepends,
+)
 from src.modules.book.dto.book_with_edition import BookWithEdition
 from src.modules.book.model import Book
-from src.modules.common.model import PyObjectId, Resource
 from src.modules.edition.dependencies import EditionBySlugDepends
 
 book_router = APIRouter(
@@ -17,10 +22,16 @@ book_router = APIRouter(
 )
 
 
-@book_router.get("/", response_model=list[Book])
-def list_books(service: BookServiceDepends):
+@book_router.get("/", response_model=PaginatedResponse[Book])
+def list_books(
+    pagination: PaginationParamsDepends,
+    filter_books: FilterBooksQueryDepends,
+    service: BookServiceDepends,
+):
     """Get a list of books."""
-    return service.get_books()
+    return service.get_books_paginated(
+        page=pagination.page, page_size=pagination.page_size, filter_query=filter_books
+    )
 
 
 @book_router.get(

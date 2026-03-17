@@ -1,4 +1,4 @@
-from src.modules.common.model import ErrorResponse, Resource
+from src.core.schema import ErrorResponse, Resource
 
 
 def not_found_response_annotation(resource: Resource):

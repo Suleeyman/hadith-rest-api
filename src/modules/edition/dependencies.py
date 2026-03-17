@@ -3,8 +3,8 @@ from typing import Annotated
 from fastapi import Depends, Path
 from pymongo.database import Database
 
+from src.core.schema import PyObjectId
 from src.database import get_database
-from src.modules.common.model import PyObjectId
 from src.modules.edition.model import Edition
 from src.modules.edition.repository import EditionRepository
 from src.modules.edition.service import EditionService

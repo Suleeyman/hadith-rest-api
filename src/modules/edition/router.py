@@ -4,7 +4,7 @@ from src.core.openapi.openapi_response_annotation import (
     invalid_request_annotation,
     not_found_response_annotation,
 )
-from src.modules.common.model import Resource
+from src.core.schema import Resource
 from src.modules.edition.dependencies import EditionServiceDepends, EditionSlug
 from src.modules.edition.dto.edition_with_books import EditionWithBooks
 from src.modules.edition.model import Edition

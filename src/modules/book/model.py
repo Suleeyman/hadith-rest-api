@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from src.modules.common.model import PyObjectId
+from src.core.schema import PyObjectId
 
 
 class Book(BaseModel):

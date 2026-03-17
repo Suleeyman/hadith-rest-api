@@ -6,11 +6,11 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 
+from src.core.schema import ErrorResponse, Resource
 from src.core.settings import settings
 from src.database import close_mongodb_connection, connect_to_mongodb
 from src.exceptions import ResourceNotFoundError
 from src.modules.book.router import book_router, edition_book_router
-from src.modules.common.model import ErrorResponse, Resource
 from src.modules.edition.router import router as edition_router
 
 logging.basicConfig(level=logging.INFO)

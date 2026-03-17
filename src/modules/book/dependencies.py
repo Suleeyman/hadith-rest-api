@@ -1,10 +1,12 @@
 from typing import Annotated
 
-from fastapi import Depends, Path
+from fastapi import Depends, Path, Query
 from pymongo.database import Database
 
+from src.core.schema import PyObjectId
 from src.database import get_database
 from src.modules.book.repository import BookRepository
+from src.modules.book.schema import FilterBooksQueries
 from src.modules.book.service import BookService
 
 """
@@ -29,6 +31,18 @@ def get_book_service(
 
 
 BookServiceDepends = Annotated[BookService, Depends(get_book_service)]
+
+
+def get_filter_queries(
+    edition: Annotated[
+        PyObjectId | None,
+        Query(description="Edition Id", example="69b55e8d6f42ba7ccb2a131d"),
+    ] = None,
+) -> FilterBooksQueries:
+    return FilterBooksQueries(edition=edition)
+
+
+FilterBooksQueryDepends = Annotated[FilterBooksQueries, Depends(get_filter_queries)]
 
 
 """
