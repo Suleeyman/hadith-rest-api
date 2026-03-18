@@ -15,5 +15,5 @@ def not_found_responses_annotation(*resources: Resource):
     }
 
 
-def invalid_request_annotation(description: str):
+def invalid_request_annotation(description: str = "Invalid request (malformed inputs)"):
     return {"model": ErrorResponse, "description": description}

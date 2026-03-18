@@ -12,6 +12,7 @@ from src.database import close_mongodb_connection, connect_to_mongodb
 from src.exceptions import ResourceNotFoundError
 from src.modules.book.router import book_router, edition_book_router
 from src.modules.edition.router import router as edition_router
+from src.modules.hadith.router import edition_hadith_router, hadith_router
 
 logging.basicConfig(level=logging.INFO)
 
@@ -51,6 +52,8 @@ app = FastAPI(
 app.include_router(router=edition_router)
 app.include_router(router=book_router)
 app.include_router(edition_book_router)
+app.include_router(router=hadith_router)
+app.include_router(edition_hadith_router)
 
 
 @app.exception_handler(RequestValidationError)

@@ -36,7 +36,7 @@ BookServiceDepends = Annotated[BookService, Depends(get_book_service)]
 def get_filter_queries(
     edition: Annotated[
         PyObjectId | None,
-        Query(description="Edition Id", example="69b55e8d6f42ba7ccb2a131d"),
+        Query(description="Edition Id", examples=["69b55e8d6f42ba7ccb2a131d"]),
     ] = None,
 ) -> FilterBooksQueries:
     return FilterBooksQueries(edition=edition)

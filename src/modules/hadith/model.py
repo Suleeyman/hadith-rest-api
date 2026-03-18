@@ -1,5 +1,7 @@
 from pydantic import BaseModel, Field
 
+from src.core.schema import PyObjectId
+
 
 class Grade(BaseModel):
     name: str
@@ -7,8 +9,8 @@ class Grade(BaseModel):
 
 
 class Hadith(BaseModel):
-    id: str = Field(alias="_id")
-    edition_id: str = Field(alias="editionId")
+    id: PyObjectId = Field(alias="_id")
+    edition_id: PyObjectId = Field(alias="editionId")
     book_index: int = Field(alias="bookIndex")
     hadith_index: int = Field(alias="hadithIndex")
     hadith_index_minor: int | None = Field(alias="hadithIndexMinor")

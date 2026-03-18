@@ -22,7 +22,13 @@ book_router = APIRouter(
 )
 
 
-@book_router.get("/", response_model=PaginatedResponse[Book])
+@book_router.get(
+    "/",
+    response_model=PaginatedResponse[Book],
+    responses={
+        400: invalid_request_annotation(),
+    },
+)
 def list_books(
     pagination: PaginationParamsDepends,
     filter_books: FilterBooksQueryDepends,
@@ -54,6 +60,7 @@ FAST003 : https://github.com/astral-sh/ruff/issues/21075
 """
 
 
+# Pagination would be over engineering that endpoint (there is less than 100 books per edition)
 @edition_book_router.get(
     "/{slug}/books",  # noqa: FAST003
     response_model=list[Book],
