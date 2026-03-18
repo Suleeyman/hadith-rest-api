@@ -5,6 +5,10 @@ from fastapi import FastAPI, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.util import get_remote_address
 
 from src.core.schema import ErrorResponse, Resource
 from src.core.settings import settings
@@ -15,6 +19,10 @@ from src.modules.edition.router import router as edition_router
 from src.modules.hadith.router import edition_hadith_router, hadith_router
 
 logging.basicConfig(level=logging.INFO)
+
+limiter = Limiter(
+    key_func=get_remote_address, default_limits=["7/minute"], enabled=True
+)
 
 
 @asynccontextmanager
@@ -48,6 +56,13 @@ app = FastAPI(
     ],
 )
 
+app.state.limiter = limiter
+"""
+Types are not well supported at the moment
+"""
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # ty:ignore[invalid-argument-type]
+
+app.add_middleware(SlowAPIMiddleware)  # ty:ignore[invalid-argument-type]
 
 app.include_router(router=edition_router)
 app.include_router(router=book_router)
@@ -95,7 +110,8 @@ def exception_404_handler(_request: Request, exc: ResourceNotFoundError):
     summary="General API information",
     description="Returns general information about the API, including links to the GitHub repository, Supporting URL, Swagger UI documentation and ReDoc documentation.",
 )
-async def root():
+@limiter.exempt
+async def root(_request: Request):
     return {
         "title": "Multilingual REST API of Popular Hadith Editions — Hadislam",
         "github_url": "https://github.com/Suleeyman/hadislam.org",
