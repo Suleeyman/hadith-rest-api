@@ -3,8 +3,9 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, status
 from fastapi.exceptions import RequestValidationError
+from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from fastapi.requests import Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
@@ -54,6 +55,8 @@ app = FastAPI(
         {"name": Resource.book},
         {"name": Resource.hadith},
     ],
+    docs_url=None,
+    redoc_url=None,
 )
 
 app.state.limiter = limiter
@@ -63,6 +66,7 @@ Types are not well supported at the moment
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # ty:ignore[invalid-argument-type]
 
 app.add_middleware(SlowAPIMiddleware)  # ty:ignore[invalid-argument-type]
+
 
 app.include_router(router=edition_router)
 app.include_router(router=book_router)
@@ -102,6 +106,34 @@ def exception_404_handler(_request: Request, exc: ResourceNotFoundError):
             code=status.HTTP_404_NOT_FOUND, message=exc.message, details=exc.details
         ).model_dump(),
     )
+
+
+@app.get("/docs", include_in_schema=False)
+def overridden_swagger():
+    return get_swagger_ui_html(
+        openapi_url="/openapi.json",
+        title=settings.app_name + " — Swagger",
+        swagger_favicon_url="/favicon.png",
+    )
+
+
+@app.get("/redoc", include_in_schema=False)
+def overridden_redoc():
+    return get_redoc_html(
+        openapi_url="/openapi.json",
+        title=settings.app_name + " — Redocly",
+        redoc_favicon_url="/favicon.png",
+    )
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse("static/favicon.ico")
+
+
+@app.get("/favicon.png", include_in_schema=False)
+async def favicon_png():
+    return FileResponse("static/favicon.png")
 
 
 @app.get(
