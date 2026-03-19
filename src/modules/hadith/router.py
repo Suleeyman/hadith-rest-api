@@ -1,23 +1,24 @@
 from fastapi import APIRouter
 
+from src.core.dependencies import LanguageSelectionDepends, SearchQueryDepends
 from src.core.openapi.openapi_response_annotation import (
     invalid_request_annotation,
     not_found_response_annotation,
     not_found_responses_annotation,
 )
-from src.core.pagination import PaginationParamsDepends
+from src.core.pagination import PaginationParamsDepends, PaginationSmallParamsDepends
 from src.core.schema import PaginatedResponse, PyObjectId, Resource
 from src.modules.book.dependencies import BookIndex
 from src.modules.edition.dependencies import EditionBySlugDepends
 from src.modules.hadith.dependencies import (
     BookHadithIndex,
+    EditionIdDepends,
     FilterHadithQueryDepends,
     HadithIndex,
     HadithIndexMinor,
     HadithServiceDepends,
-    LanguageSelectionDepends,
 )
-from src.modules.hadith.dto.hadith_response import HadithWithVariants
+from src.modules.hadith.dto.hadith_response import HadithSearchItem, HadithWithVariants
 from src.modules.hadith.model import Hadith
 
 hadith_router = APIRouter(
@@ -44,6 +45,30 @@ def list_hadiths(
         page_size=pagination.page_size,
         filter_query=filter_query,
         languages=languages,
+    )
+
+
+@hadith_router.get(
+    "/search",
+    response_model=PaginatedResponse[HadithSearchItem],
+    responses={
+        400: invalid_request_annotation(),
+    },
+)
+def search_hadiths(
+    q: SearchQueryDepends,
+    pagination: PaginationSmallParamsDepends,
+    languages: LanguageSelectionDepends,
+    service: HadithServiceDepends,
+    edition: EditionIdDepends = None,
+):
+    primary_lang = languages[0]
+    return service.search_hadiths(
+        q=q,
+        lang=primary_lang,
+        languages=languages,
+        pagination=pagination,
+        edition=edition,
     )
 
 

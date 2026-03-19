@@ -9,6 +9,10 @@ class HadithRepository:
     def __init__(self, database: Database):
         self.collection = database["hadith"]
 
+    def _aggregate_one(self, pipeline: list[dict[str, Any]]):
+        result = list(self.collection.aggregate(pipeline))
+        return result[0] if result else None
+
     def paginate(
         self,
         page: int,
@@ -53,3 +57,7 @@ class HadithRepository:
         self, document_id: ObjectId, projection: dict[str, int] | None = None
     ) -> dict[str, Any] | None:
         return self.collection.find_one({"_id": document_id}, projection)
+
+    def search(self, pipeline: list[dict[str, Any]]) -> dict[str, Any]:
+        result = self._aggregate_one(pipeline)
+        return result or {"items": [], "total": 0}

@@ -26,7 +26,7 @@ This project is licensed under the MIT License.
     app_version: str = "1.0.0"
     app_contact: dict[str, str] = {
         "name": "API Support",
-        "url": "https://github.com/Suleeyman/hadislam.org",
+        "url": "https://github.com/Suleeyman/hadith-rest-api",
         "email": "ozturksuleyman.dev@outlook.fr",
     }
     app_license: dict[str, str] = {

@@ -3,7 +3,7 @@ from typing import Any
 from bson import ObjectId
 
 from src.core.language import build_text_projection
-from src.core.schema import PyObjectId
+from src.core.schema import PaginationParams, PyObjectId
 from src.modules.hadith.exception import HadithNotFoundError
 from src.modules.hadith.repository import HadithRepository
 from src.modules.hadith.schema import FilterHadithQueries
@@ -25,6 +25,80 @@ class HadithService:
         }
         projection.update(build_text_projection(languages))
         return projection
+
+    def _search_text_projection(self, languages: list[str]) -> dict[str, Any]:
+        return {language: f"$text.{language}" for language in languages}
+
+    def _build_search_pipeline(
+        self,
+        q: str,
+        lang: str,
+        languages: list[str],
+        pagination: PaginationParams,
+        edition: PyObjectId | None,
+    ) -> list[dict[str, Any]]:
+        search_compound: dict[str, Any] = {
+            "must": [
+                {
+                    "text": {
+                        "query": q,
+                        "path": f"text.{lang}",
+                        "fuzzy": {"maxEdits": 1, "prefixLength": 2},
+                    }
+                }
+            ]
+        }
+        if edition is not None:
+            search_compound["filter"] = [
+                {
+                    "equals": {
+                        "path": "editionId",
+                        "value": ObjectId(edition),
+                    }
+                }
+            ]
+
+        skip = (pagination.page - 1) * pagination.page_size
+        project_stage = {
+            "$project": {
+                "_id": 1,
+                "editionId": 1,
+                "bookIndex": 1,
+                "hadithIndex": 1,
+                "hadithIndexMinor": 1,
+                "bookHadithIndex": 1,
+                "text": self._search_text_projection(languages),
+                "grades": 1,
+                "score": {"$meta": "searchScore"},
+            }
+        }
+
+        return [
+            {
+                "$search": {
+                    "index": "hadithSearchIndex",
+                    "compound": search_compound,
+                }
+            },
+            {"$limit": 100},
+            {
+                "$facet": {
+                    "items": [
+                        project_stage,
+                        {"$sort": {"score": -1}},
+                        {"$skip": skip},
+                        {"$limit": pagination.page_size},
+                    ],
+                    "total": [{"$count": "count"}],
+                }
+            },
+            {
+                "$project": {
+                    "items": 1,
+                    "total": {"$ifNull": [{"$arrayElemAt": ["$total.count", 0]}, 0]},
+                }
+            },
+        ]
 
     def get_hadith_by_id(
         self, hadith_id: PyObjectId, languages: list[str]
@@ -61,6 +135,29 @@ class HadithService:
     ) -> dict[str, Any]:
         filter_query = FilterHadithQueries(edition=edition_id)
         return self.get_hadiths_paginated(page, page_size, filter_query, languages)
+
+    def search_hadiths(
+        self,
+        q: str,
+        lang: str,
+        languages: list[str],
+        pagination: PaginationParams,
+        edition: PyObjectId | None,
+    ) -> dict[str, Any]:
+        pipeline = self._build_search_pipeline(
+            q=q,
+            lang=lang,
+            languages=languages,
+            pagination=pagination,
+            edition=edition,
+        )
+        result = self.repository.search(pipeline)
+        return {
+            "total": result.get("total", 0),
+            "page": pagination.page,
+            "page_size": pagination.page_size,
+            "items": result.get("items", []),
+        }
 
     def get_hadiths_by_edition_and_book_paginated(
         self,

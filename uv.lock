@@ -331,7 +331,7 @@ wheels = [
 ]
 
 [[package]]
-name = "hadislam-org"
+name = "hadith-rest-api"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
@@ -351,7 +351,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", extras = ["standard"], specifier = ">=0.135.1" },
-    { name = "pymongo", extras = ["srv"], specifier = ">=4.16.0" },
+    { name = "pymongo", specifier = ">=4.16.0" },
     { name = "slowapi", specifier = ">=0.1.9" },
 ]
 

@@ -1,12 +1,12 @@
 [project]
-name = "hadislam-org"
+name = "hadith-rest-api"
 version = "0.1.0"
 description = "Multilingual REST API for most popular hadith editions : Sahih Al-Bukhari, Sahih Muslim, Jami At-Tirmidhi, Sunan Abu Dawud, Muwatta Malik, and much more."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi[standard]>=0.135.1",
-    "pymongo[srv]>=4.16.0",
+    "pymongo>=4.16.0",
     "slowapi>=0.1.9",
 ]
 

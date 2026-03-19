@@ -11,6 +11,19 @@
 
 # 🌙 Hadith REST API
 
+## Table of Contents
+
+- [Summary](#summary)
+- [Features](#features)
+- [API](#api)
+- [Quick Start](#quick-start)
+- [TODO](#todo)
+- [License](#license)
+- [Feedback](#feedback)
+- [Contributing](#contributing)
+
+## Summary
+
 Free and Open Source Multilingual (arabic (+diacritics), english, bengali, indonesian, french, turkish, tamil, russian) REST API for most popular hadith editions including :
 
 - Forty Hadith of Shah Waliullah Dehlawi
@@ -36,6 +49,10 @@ Open-source REST API developed with [FastAPI](https://fastapi.tiangolo.com/) for
 - Related books (_i.e_ a big chapter of an edition)
 - Language-aware hadith
 - Grade for hadith
+
+**Why “Hadislam”?**
+
+The name Hadislam combines Hadith and Islam, reflecting the project’s purpose: to provide easy, open-source access to authentic Hadith resources. It’s designed for developers and enthusiasts who want a reliable API to explore most popular Islamic Hadith sources.
 
 ## Features
 
@@ -72,11 +89,11 @@ Open-source REST API developed with [FastAPI](https://fastapi.tiangolo.com/) for
 - `/editions/{slug}/hadiths/{hadith_index}.{hadith_index_minor}` — Get one minor (that is a sub hadith of a hadith) hadith by his numerical position inside the edition
 - `/editions/{slug}/hadiths/{hadith_index}` — Get one hadith (including his sub-hadith) by his numerical position inside the edition
 - `/editions/{slug}/books/{book_index}/hadiths` — List hadiths of an edition's book
-  `/editions/{slug}/books/{book_index}/hadiths/{book_hadith_index}` — Get one hadith (including his sub-hadith) by his relative numerical position inside the book
+- `/editions/{slug}/books/{book_index}/hadiths/{book_hadith_index}` — Get one hadith (including his sub-hadith) by his relative numerical position inside the book
 
 #### Search
 
-- `/search/{}`
+- `/hadiths/search?q=...` — Performs a full-text search on hadiths based on query `q`. English by default.
 
 ## Quick Start
 
@@ -124,6 +141,30 @@ uv run ruff check .
 uv run ruff format .
 ```
 
+## TODO
+
+### Contributor & Documentation
+
+- Define **improvement guidelines** for contributors
+- Improve **API docs** with request/response examples
+- Create **issue templates** for consistent reporting
+- Create a **AGENTS.md** file
+
+### API & Backend
+
+- Create a **better rate limit policy**
+- Integrate **Redis** for faster data retrieval
+- Add **unit tests** for core functionality
+
+### Development & Deployment
+
+- Add **Docker** for quick local development
+- Insert **bulk data** into local environment for quick start
+
+### Team
+
+- Add **Bruno** (team or collaborator)
+
 ## 📜 License
 
 This project is licensed under the MIT License. See `LICENSE`.
@@ -146,10 +187,8 @@ If you want to support me financially you can [buy me a coffee](https://ko-fi.co
 
 **📬 A quick thank-you**
 
-If this project helped you, you can send me a message (a comment) on Ko-fi.  
+If this project helped you, you can send me a message.
+
 You don’t have to donate — even a simple message of support or a quick “thank you” means a lot and keeps me motivated to continue improving this project.
 
-👉 Write a comment [here](https://ko-fi.com/post/Supporting-the-Esmaul-Husna-REST-API-Z8Z01MKPMF) at the very bottom of the article.
-
 Your encouragement truly makes a difference 🙌
-Feel free to send a message — your encouragement keeps this project alive!

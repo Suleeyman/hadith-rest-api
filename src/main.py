@@ -146,7 +146,7 @@ async def favicon_png():
 async def root(_request: Request):
     return {
         "title": "Multilingual REST API of Popular Hadith Editions — Hadislam",
-        "github_url": "https://github.com/Suleeyman/hadislam.org",
+        "github_url": "https://github.com/Suleeyman/hadith-rest-api",
         "support": "https://ko-fi.com/ysuleyman",
         "swagger": "/docs",
         "redocly": "/redoc",

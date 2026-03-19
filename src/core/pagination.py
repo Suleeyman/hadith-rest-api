@@ -6,6 +6,23 @@ from pymongo.collection import Collection
 from src.core.schema import PaginationParams
 
 
+def pagination_params_factory(max_page_size: int = 100, default_size: int = 100):
+    def get_pagination_params(
+        page: Annotated[int, Query(ge=1, description="Page number (1-based)")] = 1,
+        page_size: Annotated[
+            int,
+            Query(
+                ge=1,
+                le=max_page_size,
+                description=f"Items per page (max {max_page_size})",
+            ),
+        ] = default_size,
+    ):
+        return PaginationParams(page=page, page_size=page_size)
+
+    return get_pagination_params
+
+
 def get_pagination_params(
     page: Annotated[int, Query(ge=1, description="Page number (1-based)")] = 1,
     page_size: Annotated[
@@ -15,7 +32,13 @@ def get_pagination_params(
     return PaginationParams(page=page, page_size=page_size)
 
 
-PaginationParamsDepends = Annotated[PaginationParams, Depends(get_pagination_params)]
+PaginationParamsDepends = Annotated[
+    PaginationParams, Depends(pagination_params_factory(100, 50))
+]
+
+PaginationSmallParamsDepends = Annotated[
+    PaginationParams, Depends(pagination_params_factory(20, 10))
+]
 
 
 def paginate_collection(

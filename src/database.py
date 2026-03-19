@@ -31,7 +31,7 @@ def connect_to_mongodb() -> None:
     logger.info("Connecting to MongoDB...")
     db.client = MongoClient(
         host=settings.mongo_uri,
-        server_api=ServerApi(version="1", strict=True, deprecation_errors=True),
+        server_api=ServerApi(version="1", deprecation_errors=True),
     )
     db.database = db.client[settings.mongo_db]
 

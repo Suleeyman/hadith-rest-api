@@ -14,7 +14,7 @@ def test_read_main() -> None:
     assert response.status_code == HTTPStatus.OK
     assert data == {
         "title": "Multilingual REST API of Popular Hadith Editions — Hadislam",
-        "github_url": "https://github.com/Suleeyman/hadislam.org",
+        "github_url": "https://github.com/Suleeyman/hadith-rest-api",
         "support": "https://ko-fi.com/ysuleyman",
         "swagger": "/docs",
         "redocly": "/redoc",
