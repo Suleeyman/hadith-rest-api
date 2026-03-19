@@ -16,14 +16,6 @@ class AppDatabase:
     database: Database | None = None
 
 
-# Create a new client and connect to the server
-client: MongoClient = MongoClient(
-    host=settings.mongo_uri,
-    server_api=ServerApi(version="1", strict=True, deprecation_errors=True),
-)
-database = client.get_database(name=settings.mongo_db)
-# Send a ping to confirm a successful connection
-
 db = AppDatabase()
 
 

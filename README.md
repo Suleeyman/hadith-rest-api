@@ -185,6 +185,8 @@ _to be written_
 
 If you want to support me financially you can [buy me a coffee](https://ko-fi.com/ysuleyman) it will certainly motivate me on continously improving the REST API. May Allah rewards you !
 
+You can read my _ko-fi_ [post](https://ko-fi.com/post/I-built-a-new-Islamic-hadith-API-L3L11W8RNV) and add a comment.
+
 **📬 A quick thank-you**
 
 If this project helped you, you can send me a message.
