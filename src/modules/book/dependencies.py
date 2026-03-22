@@ -50,5 +50,5 @@ Values
 """
 BookIndex = Annotated[
     int,
-    Path(ge=1, le=128, description="Book index as it appears in the Edition"),
+    Path(ge=0, le=128, description="Book index as it appears in the Edition"),
 ]
