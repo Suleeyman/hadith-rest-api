@@ -1,7 +1,9 @@
+import html
 import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, status
+from fastapi.exception_handlers import http_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from fastapi.requests import Request
@@ -10,6 +12,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from src.core.schema import ErrorResponse, Resource
 from src.core.settings import settings
@@ -82,11 +85,13 @@ async def validation_exception_handler(_request: Request, exc: RequestValidation
     for error in exc.errors():
         loc = error["loc"]
         max_length = error.get("ctx", {}).get("max_length", 64)
-        got = (
-            error["input"]
-            if len(error["input"]) <= max_length
-            else error["input"][:max_length] + "..."
-        )
+        got = "nothing"
+        if error["input"] is not None:
+            got = (
+                error["input"]
+                if len(error["input"]) <= max_length
+                else error["input"][:max_length] + "..."
+            )
         details[loc[1]] = f"{error['msg']} (got {got})."
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
@@ -106,6 +111,35 @@ def exception_404_handler(_request: Request, exc: ResourceNotFoundError):
             code=status.HTTP_404_NOT_FOUND, message=exc.message, details=exc.details
         ).model_dump(),
     )
+
+
+@app.exception_handler(Exception)
+async def internal_exception_handler(_request: Request, _exc: Exception):
+    """Handle uncaught exceptions and return a standardized 500 error response."""
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content=ErrorResponse(
+            code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            message="Internal server error",
+        ).model_dump(),
+    )
+
+
+@app.exception_handler(StarletteHTTPException)
+async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
+    """Handle FastAPI default 404 Not Found or fallback to default."""
+    if exc.status_code == status.HTTP_404_NOT_FOUND:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=ErrorResponse(
+                code=status.HTTP_404_NOT_FOUND,
+                message="Resource not found",
+                details={"path": html.escape(request.url.path)},
+            ).model_dump(),
+        )
+
+    # For other HTTP exceptions, fallback to default behavior
+    return await http_exception_handler(request, exc)
 
 
 @app.get("/docs", include_in_schema=False)

@@ -1,6 +1,11 @@
 from fastapi import APIRouter
 
-from src.core.dependencies import LanguageSelectionDepends, SearchQueryDepends
+from src.core.dependencies import (
+    LanguageQuery,
+    ManyLanguageSelectionDepends,
+    SearchQueryDepends,
+)
+from src.core.language import Language
 from src.core.openapi.openapi_response_annotation import (
     invalid_request_annotation,
     not_found_response_annotation,
@@ -37,7 +42,7 @@ hadith_router = APIRouter(
 def list_hadiths(
     pagination: PaginationParamsDepends,
     filter_query: FilterHadithQueryDepends,
-    languages: LanguageSelectionDepends,
+    languages: ManyLanguageSelectionDepends,
     service: HadithServiceDepends,
 ):
     return service.get_hadiths_paginated(
@@ -55,17 +60,17 @@ def list_hadiths(
         400: invalid_request_annotation(),
     },
 )
-def search_hadiths(
+def search_hadiths(  # noqa: PLR0913
     q: SearchQueryDepends,
     pagination: PaginationSmallParamsDepends,
-    languages: LanguageSelectionDepends,
+    languages: ManyLanguageSelectionDepends,
     service: HadithServiceDepends,
+    search_lang: LanguageQuery = Language.en,
     edition: EditionIdDepends = None,
 ):
-    primary_lang = languages[0]
     return service.search_hadiths(
         q=q,
-        lang=primary_lang,
+        lang=search_lang,
         languages=languages,
         pagination=pagination,
         edition=edition,
@@ -82,7 +87,7 @@ def search_hadiths(
 )
 def get_hadith_by_id(
     hadith_id: PyObjectId,
-    languages: LanguageSelectionDepends,
+    languages: ManyLanguageSelectionDepends,
     service: HadithServiceDepends,
 ):
     return service.get_hadith_by_id(hadith_id, languages)
@@ -107,7 +112,7 @@ FAST003 : https://github.com/astral-sh/ruff/issues/21075
 def list_hadiths_by_edition_slug(
     edition: EditionBySlugDepends,
     pagination: PaginationParamsDepends,
-    languages: LanguageSelectionDepends,
+    languages: ManyLanguageSelectionDepends,
     service: HadithServiceDepends,
 ):
     return service.get_hadiths_by_edition_paginated(
@@ -130,7 +135,7 @@ def get_hadith_variant_by_index(
     edition: EditionBySlugDepends,
     hadith_index: HadithIndex,
     hadith_index_minor: HadithIndexMinor,
-    languages: LanguageSelectionDepends,
+    languages: ManyLanguageSelectionDepends,
     service: HadithServiceDepends,
 ):
     return service.get_hadith_variant_by_edition_and_index_minor(
@@ -153,7 +158,7 @@ def get_hadith_variant_by_index(
 def get_hadith_by_index(
     edition: EditionBySlugDepends,
     hadith_index: HadithIndex,
-    languages: LanguageSelectionDepends,
+    languages: ManyLanguageSelectionDepends,
     service: HadithServiceDepends,
 ):
     return service.get_hadith_by_edition_and_index(
@@ -173,7 +178,7 @@ def list_hadiths_by_book(
     edition: EditionBySlugDepends,
     book_index: BookIndex,
     pagination: PaginationParamsDepends,
-    languages: LanguageSelectionDepends,
+    languages: ManyLanguageSelectionDepends,
     service: HadithServiceDepends,
 ):
     return service.get_hadiths_by_edition_and_book_paginated(
@@ -197,7 +202,7 @@ def get_hadith_by_book_index(
     edition: EditionBySlugDepends,
     book_index: BookIndex,
     book_hadith_index: BookHadithIndex,
-    languages: LanguageSelectionDepends,
+    languages: ManyLanguageSelectionDepends,
     service: HadithServiceDepends,
 ):
     return service.get_hadith_by_edition_book_and_index(

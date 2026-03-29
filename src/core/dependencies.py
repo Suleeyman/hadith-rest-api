@@ -13,6 +13,15 @@ LanguageQuery = Annotated[
     ),
 ]
 
+ManyLanguageQuery = Annotated[
+    list[Language],
+    Query(
+        default_factory=lambda: [Language.en],
+        description="Many language code",
+        examples=[[Language.en, Language.ar_diacritics, Language.bn]],
+    ),
+]
+
 
 IncludeArabicQuery = Annotated[
     Carry,
@@ -38,6 +47,19 @@ def get_language_selection(
 
 
 LanguageSelectionDepends = Annotated[list[str], Depends(get_language_selection)]
+
+
+def get_many_language_selection(
+    lang: ManyLanguageQuery,
+) -> list[str]:
+    # Return as string values, duplicate removed
+    return list({lg.value for lg in lang})
+
+
+ManyLanguageSelectionDepends = Annotated[
+    list[str], Depends(get_many_language_selection)
+]
+
 
 SearchQueryDepends = Annotated[
     str,

@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from src.core.dependencies import ManyLanguageSelectionDepends
 from src.core.openapi.openapi_response_annotation import (
     invalid_request_annotation,
     not_found_response_annotation,
@@ -33,10 +34,14 @@ def list_books(
     pagination: PaginationParamsDepends,
     filter_books: FilterBooksQueryDepends,
     service: BookServiceDepends,
+    languages: ManyLanguageSelectionDepends,
 ):
     """Get a list of books."""
     return service.get_books_paginated(
-        page=pagination.page, page_size=pagination.page_size, filter_query=filter_books
+        page=pagination.page,
+        page_size=pagination.page_size,
+        filter_query=filter_books,
+        languages=languages,
     )
 
 
@@ -48,8 +53,12 @@ def list_books(
         400: invalid_request_annotation("Invalid Book Id Format"),
     },
 )
-def get_book_by_id(book_id: PyObjectId, service: BookServiceDepends):
-    return service.get_book_by_id(book_id)
+def get_book_by_id(
+    book_id: PyObjectId,
+    service: BookServiceDepends,
+    languages: ManyLanguageSelectionDepends,
+):
+    return service.get_book_by_id(book_id, languages=languages)
 
 
 edition_book_router = APIRouter(prefix="/editions", tags=["Book"])
@@ -72,8 +81,9 @@ FAST003 : https://github.com/astral-sh/ruff/issues/21075
 def list_books_by_edition_slug(
     edition: EditionBySlugDepends,
     book_service: BookServiceDepends,
+    languages: ManyLanguageSelectionDepends,
 ):
-    return book_service.get_books_by_edition_id(edition.id)
+    return book_service.get_books_by_edition_id(edition.id, languages=languages)
 
 
 @edition_book_router.get(
@@ -88,5 +98,8 @@ def get_book_by_edition_slug_and_book_index(
     edition: EditionBySlugDepends,
     book_index: BookIndex,
     book_service: BookServiceDepends,
+    languages: ManyLanguageSelectionDepends,
 ):
-    return book_service.get_book_by_edition_and_index(edition.id, book_index)
+    return book_service.get_book_by_edition_and_index(
+        edition.id, book_index, languages=languages
+    )

@@ -1,8 +1,9 @@
 from typing import Annotated
 
-from fastapi import Depends, Path
+from fastapi import Depends, Path, Query
 from pymongo.database import Database
 
+from src.core.language import Language
 from src.core.schema import PyObjectId
 from src.database import get_database
 from src.modules.edition.model import Edition
@@ -18,6 +19,14 @@ EditionSlug = Annotated[
         min_length=1,
         max_length=64,
         description="Hyphen separated latinized english edition name",
+    ),
+]
+
+FilterByAvailableLanguage = Annotated[
+    Language | None,
+    Query(
+        description="Filter by available language",
+        examples=[Language.fr],
     ),
 ]
 

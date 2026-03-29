@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from typing import Annotated, Any
 
 from fastapi import Depends, Query
@@ -41,22 +42,22 @@ PaginationSmallParamsDepends = Annotated[
 ]
 
 
-def paginate_collection(
+def paginate_collection(  # noqa: PLR0913
     collection: Collection,
     page: int,
     page_size: int,
     filter_query: dict[str, Any] | None = None,
+    projection: dict[str, int] | None = None,
+    sort: Iterable[tuple[str, int]] | None = None,
 ) -> dict[str, Any]:
-    if page < 1:
-        raise ValueError("page must be >= 1")
-    if page_size <= 0:
-        raise ValueError("page_size must be > 0")
-
     query = filter_query if filter_query is not None else {}
     skip = (page - 1) * page_size
 
     total = collection.count_documents(query)
-    items = list(collection.find(query).skip(skip).limit(page_size))
+    cursor = collection.find(query, projection)
+    if sort:
+        cursor = cursor.sort(list(sort))
+    items = list(cursor.skip(skip).limit(page_size))
 
     return {
         "total": total,

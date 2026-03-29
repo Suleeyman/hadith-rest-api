@@ -52,6 +52,10 @@ def build_text_projection(languages: list[str]) -> MongoProjection:
     return {f"text.{language}": 1 for language in languages}
 
 
+def build_name_projection(languages: list[str]) -> MongoProjection:
+    return {f"name.{language}": 1 for language in languages}
+
+
 def select_text(
     text: dict[str, str] | None, languages: list[str]
 ) -> str | dict[str, str]:

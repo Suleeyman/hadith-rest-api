@@ -1,11 +1,16 @@
 from fastapi import APIRouter
 
+from src.core.dependencies import ManyLanguageSelectionDepends
 from src.core.openapi.openapi_response_annotation import (
     invalid_request_annotation,
     not_found_response_annotation,
 )
 from src.core.schema import Resource
-from src.modules.edition.dependencies import EditionServiceDepends, EditionSlug
+from src.modules.edition.dependencies import (
+    EditionServiceDepends,
+    EditionSlug,
+    FilterByAvailableLanguage,
+)
 from src.modules.edition.dto.edition_with_books import EditionWithBooks
 from src.modules.edition.model import Edition
 
@@ -16,9 +21,13 @@ router = APIRouter(
 
 
 @router.get("/", response_model=list[Edition])
-def list_editions(service: EditionServiceDepends):
+def list_editions(
+    service: EditionServiceDepends,
+    languages: ManyLanguageSelectionDepends,
+    available: FilterByAvailableLanguage = None,
+):
     """Get a list of editions."""
-    return service.get_editions()
+    return service.get_editions(languages, available_language=available)
 
 
 @router.get(
@@ -29,6 +38,10 @@ def list_editions(service: EditionServiceDepends):
         400: invalid_request_annotation("Invalid Edition Slug Format"),
     },
 )
-def get_edition_by_slug(slug: EditionSlug, service: EditionServiceDepends):
+def get_edition_by_slug(
+    slug: EditionSlug,
+    service: EditionServiceDepends,
+    languages: ManyLanguageSelectionDepends,
+):
     """Get a specific edition by slug."""
-    return service.get_edition_by_slug_join_books(slug.lower())
+    return service.get_edition_by_slug_join_books(slug.lower(), languages)

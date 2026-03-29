@@ -100,6 +100,8 @@ class HadithService:
             },
         ]
 
+    # ----- GETS -----
+
     def get_hadith_by_id(
         self, hadith_id: PyObjectId, languages: list[str]
     ) -> dict[str, Any]:
