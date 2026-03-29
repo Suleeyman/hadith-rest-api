@@ -17,6 +17,7 @@ class Language(StrEnum):
     id = "id"
     bn = "bn"
     ta = "ta"
+    ru = "ru"
 
 
 class LanguageError(ValueError):

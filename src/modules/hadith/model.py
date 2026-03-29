@@ -1,19 +1,25 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+from pydantic.v1.utils import to_lower_camel
 
+from src.core.language import Language
 from src.core.schema import PyObjectId
 
 
 class Grade(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     name: str
     grade: str
 
 
 class Hadith(BaseModel):
+    model_config = ConfigDict(alias_generator=to_lower_camel, frozen=True)
+
     id: PyObjectId = Field(alias="_id")
-    edition_id: PyObjectId = Field(alias="editionId")
-    book_index: int = Field(alias="bookIndex")
-    hadith_index: int = Field(alias="hadithIndex")
-    hadith_index_minor: int | None = Field(alias="hadithIndexMinor")
-    book_hadith_index: int = Field(alias="bookHadithIndex")
-    text: dict[str, str]  # e.g., {"ar": "...", "en": "...", etc.}
+    edition_id: PyObjectId
+    book_index: int
+    hadith_index: int
+    hadith_index_minor: int | None
+    book_hadith_index: int
+    text: dict[Language, str]  # e.g., {"ar": "...", "en": "...", etc.}
     grades: list[Grade]
