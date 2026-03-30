@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends, Query
 from pydantic import StringConstraints
 
-from src.core.language import Carry, Language, resolve_languages
+from src.core.language import Carry, Language, LanguageSelection, resolve_languages
 
 LanguageQuery = Annotated[
     Language,
@@ -14,7 +14,7 @@ LanguageQuery = Annotated[
 ]
 
 ManyLanguageQuery = Annotated[
-    list[Language],
+    list[LanguageSelection],
     Query(
         default_factory=lambda: [Language.en],
         description="Many language code",
@@ -53,7 +53,9 @@ def get_many_language_selection(
     lang: ManyLanguageQuery,
 ) -> list[str]:
     # Return as string values, duplicate removed
-    return list({lg.value for lg in lang})
+    if "*" in lang:
+        return ["*"]
+    return list({lg.value for lg in lang if lg != "*"})
 
 
 ManyLanguageSelectionDepends = Annotated[

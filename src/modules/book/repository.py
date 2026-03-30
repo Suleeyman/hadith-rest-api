@@ -22,6 +22,9 @@ class BookRepository:
             "bookIndex": 1,
             "hadithIndexStart": 1,
         }
+        if "*" in languages:
+            projection.update({"name": 1})
+            return projection
         projection.update(build_name_projection(languages))
         return projection
 
@@ -87,6 +90,10 @@ class BookRepository:
         return self._aggregate_many(pipeline)
 
     def find_one_by_id_join_edition(self, document_id: ObjectId, languages: list[str]):
+        if "*" in languages:
+            pipeline = [{"$match": {"_id": document_id}}, *self._lookup_edition()]
+            return self._aggregate_one(pipeline)
+
         projection = self._projection_for_languages(languages)
         pipeline = [
             {"$match": {"_id": document_id}},
@@ -114,6 +121,17 @@ class BookRepository:
     def find_one_by_book_index_with_edition_id_join_edition(
         self, book_index: int, edition_id: ObjectId, languages: list[str]
     ):
+        if "*" in languages:
+            pipeline = [
+                {
+                    "$match": {
+                        "editionId": edition_id,
+                        "bookIndex": book_index,
+                    }
+                },
+                *self._lookup_edition(),
+            ]
+            return self._aggregate_one(pipeline)
         projection = self._projection_for_languages(languages)
         pipeline = [
             {

@@ -18,6 +18,9 @@ class EditionRepository:
             "hadithCount": 1,
             "bookCount": 1,
         }
+        if "*" in languages:
+            projection.update({"name": 1})
+            return projection
         projection.update(build_name_projection(languages))
         return projection
 
@@ -48,7 +51,6 @@ class EditionRepository:
         query = {}
         if available_language is not None:
             query["availableLanguages"] = available_language  # simpler than $in
-
         return list(self.collection.find(query, projection))
 
     def find_one_by_id(self, document_id: ObjectId):
@@ -59,6 +61,10 @@ class EditionRepository:
 
     # ----- LOOKUP FIND -----
     def find_one_by_slug_join_books(self, slug: str, languages: list[str]):
+        if "*" in languages:
+            pipeline = [{"$match": {"slug": slug}}, *self._lookup_edition()]
+            return self._aggregate_one(pipeline)
+
         projection = self._projection_for_languages(languages)
 
         pipeline = [

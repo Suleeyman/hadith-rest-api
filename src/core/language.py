@@ -20,8 +20,20 @@ class Language(StrEnum):
     ru = "ru"
 
 
-class LanguageError(ValueError):
-    pass
+# Same as above but with 'all'
+# Used for Query
+class LanguageSelection(StrEnum):
+    ar = "ar"
+    ar_diacritics = "ar-diacritics"
+    en = "en"
+    fr = "fr"
+    tr = "tr"
+    ur = "ur"
+    id = "id"
+    bn = "bn"
+    ta = "ta"
+    ru = "ru"
+    all = "*"
 
 
 def resolve_languages(
@@ -54,24 +66,3 @@ def build_text_projection(languages: list[str]) -> MongoProjection:
 
 def build_name_projection(languages: list[str]) -> MongoProjection:
     return {f"name.{language}": 1 for language in languages}
-
-
-def select_text(
-    text: dict[str, str] | None, languages: list[str]
-) -> str | dict[str, str]:
-    if not text:
-        raise LanguageError("Requested language not available.")
-
-    selected = {
-        language: text[language]
-        for language in languages
-        if language in text and text[language] is not None
-    }
-
-    if not selected:
-        raise LanguageError("Requested language not available.")
-
-    if len(selected) == 1:
-        return next(iter(selected.values()))
-
-    return selected

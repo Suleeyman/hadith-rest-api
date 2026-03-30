@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Literal
 
 from bson import ObjectId
 
@@ -23,10 +23,17 @@ class HadithService:
             "bookHadithIndex": 1,
             "grades": 1,
         }
+        if "*" in languages:
+            projection.update({"text": 1})
+            return projection
         projection.update(build_text_projection(languages))
         return projection
 
-    def _search_text_projection(self, languages: list[str]) -> dict[str, Any]:
+    def _search_text_projection(
+        self, languages: list[str]
+    ) -> dict[str, Any] | Literal[1]:
+        if "*" in languages:
+            return 1
         return {language: f"$text.{language}" for language in languages}
 
     def _build_search_pipeline(
