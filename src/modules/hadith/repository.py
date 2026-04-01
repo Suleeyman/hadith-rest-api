@@ -58,6 +58,10 @@ class HadithRepository:
     ) -> dict[str, Any] | None:
         return self.collection.find_one({"_id": document_id}, projection)
 
+    def find_one_with_lookup(self, pipeline: list[dict]) -> dict[str, Any] | None:
+        result = list(self.collection.aggregate(pipeline))
+        return result[0] if result else None
+
     def search(self, pipeline: list[dict[str, Any]]) -> dict[str, Any]:
         result = self._aggregate_one(pipeline)
         return result or {"items": [], "total": 0}

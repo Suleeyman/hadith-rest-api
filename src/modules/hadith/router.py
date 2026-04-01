@@ -23,7 +23,11 @@ from src.modules.hadith.dependencies import (
     HadithIndexMinor,
     HadithServiceDepends,
 )
-from src.modules.hadith.dto.hadith_response import HadithSearchItem, HadithWithVariants
+from src.modules.hadith.dto.hadith_response import (
+    HadithJoinedEditionAndBook,
+    HadithSearchItem,
+    HadithWithVariants,
+)
 from src.modules.hadith.model import Hadith
 
 hadith_router = APIRouter(
@@ -79,7 +83,7 @@ def search_hadiths(  # noqa: PLR0913
 
 @hadith_router.get(
     "/{hadith_id}",
-    response_model=Hadith,
+    response_model=HadithJoinedEditionAndBook,
     responses={
         404: not_found_response_annotation(Resource.hadith),
         400: invalid_request_annotation(),

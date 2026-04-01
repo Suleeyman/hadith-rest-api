@@ -13,6 +13,91 @@ class HadithService:
     def __init__(self, repository: HadithRepository):
         self.repository = repository
 
+    def _build_get_by_id_pipeline(
+        self, hadith_id: ObjectId, languages: list[str]
+    ) -> list[dict[str, Any]]:
+        return [
+            {"$match": {"_id": hadith_id}},
+            # 🔹 Edition lookup
+            {
+                "$lookup": {
+                    "from": "edition",
+                    "let": {"id": "$editionId"},
+                    "pipeline": [
+                        {"$match": {"$expr": {"$eq": ["$_id", "$$id"]}}},
+                        {
+                            "$project": {
+                                "_id": 1,
+                                "slug": 1,
+                                "availableLanguages": 1,
+                                "hadithCount": 1,
+                                "bookCount": 1,
+                                "name": self._filter_languages_expr(languages, "$name"),
+                            }
+                        },
+                    ],
+                    "as": "edition",
+                }
+            },
+            {"$unwind": {"path": "$edition", "preserveNullAndEmptyArrays": True}},
+            # 🔹 Book lookup
+            {
+                "$lookup": {
+                    "from": "book",
+                    "let": {
+                        "editionId": "$editionId",
+                        "bookIndex": "$bookIndex",
+                    },
+                    "pipeline": [
+                        {
+                            "$match": {
+                                "$expr": {
+                                    "$and": [
+                                        {"$eq": ["$editionId", "$$editionId"]},
+                                        {"$eq": ["$bookIndex", "$$bookIndex"]},
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "$project": {
+                                "_id": 1,
+                                "slug": 1,
+                                "editionId": 1,
+                                "bookIndex": 1,
+                                "hadithCount": 1,
+                                "hadithIndexStart": 1,
+                                "name": self._filter_languages_expr(languages, "$name"),
+                            }
+                        },
+                    ],
+                    "as": "book",
+                }
+            },
+            {"$unwind": {"path": "$book", "preserveNullAndEmptyArrays": True}},
+            # 🔹 Final projection (reuse your logic)
+            {
+                "$project": {
+                    **self._projection_for_languages(languages),
+                    # remove nulls cleanly
+                    "edition": {
+                        "$cond": [
+                            {"$ne": ["$edition", None]},
+                            "$edition",
+                            "$$REMOVE",
+                        ]
+                    },
+                    "book": {
+                        "$cond": [
+                            {"$ne": ["$book", None]},
+                            "$book",
+                            "$$REMOVE",
+                        ]
+                    },
+                }
+            },
+        ]
+
     def _projection_for_languages(self, languages: list[str]) -> dict[str, int]:
         projection = {
             "_id": 1,
@@ -29,12 +114,26 @@ class HadithService:
         projection.update(build_text_projection(languages))
         return projection
 
+    def _filter_languages_expr(self, languages: list[str], field: str) -> Any:
+        if "*" in languages:
+            return field
+
+        return {
+            "$arrayToObject": {
+                "$filter": {
+                    "input": {"$objectToArray": field},
+                    "as": "item",
+                    "cond": {"$in": ["$$item.k", languages]},
+                }
+            }
+        }
+
     def _search_text_projection(
-        self, languages: list[str]
+        self, languages: list[str], key: str = "$text"
     ) -> dict[str, Any] | Literal[1]:
         if "*" in languages:
             return 1
-        return {language: f"$text.{language}" for language in languages}
+        return {language: f"{key}.{language}" for language in languages}
 
     def _build_search_pipeline(
         self,
@@ -77,6 +176,8 @@ class HadithService:
                 "text": self._search_text_projection(languages),
                 "grades": 1,
                 "score": {"$meta": "searchScore"},
+                "edition": 1,
+                "book": 1,
             }
         }
 
@@ -88,6 +189,62 @@ class HadithService:
                 }
             },
             {"$limit": 100},
+            # 👇 ADD LOOKUPS HERE
+            {
+                "$lookup": {
+                    "from": "edition",
+                    "let": {"id": "$editionId"},
+                    "pipeline": [
+                        {"$match": {"$expr": {"$eq": ["$_id", "$$id"]}}},
+                        {
+                            "$project": {
+                                "_id": 1,
+                                "availableLanguages": 1,
+                                "slug": 1,
+                                "hadithCount": 1,
+                                "bookCount": 1,
+                                "name": self._filter_languages_expr(languages, "$name"),
+                            }
+                        },
+                    ],
+                    "as": "edition",
+                }
+            },
+            {"$unwind": {"path": "$edition", "preserveNullAndEmptyArrays": True}},
+            {
+                "$lookup": {
+                    "from": "book",
+                    "let": {
+                        "editionId": "$editionId",
+                        "bookIndex": "$bookIndex",
+                    },
+                    "pipeline": [
+                        {
+                            "$match": {
+                                "$expr": {
+                                    "$and": [
+                                        {"$eq": ["$editionId", "$$editionId"]},
+                                        {"$eq": ["$bookIndex", "$$bookIndex"]},
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "$project": {
+                                "_id": 1,
+                                "slug": 1,
+                                "editionId": 1,
+                                "hadithCount": 1,
+                                "bookIndex": 1,
+                                "hadithIndexStart": 1,
+                                "name": self._filter_languages_expr(languages, "$name"),
+                            }
+                        },
+                    ],
+                    "as": "book",
+                }
+            },
+            {"$unwind": {"path": "$book", "preserveNullAndEmptyArrays": True}},
             {
                 "$facet": {
                     "items": [
@@ -112,10 +269,13 @@ class HadithService:
     def get_hadith_by_id(
         self, hadith_id: PyObjectId, languages: list[str]
     ) -> dict[str, Any]:
-        projection = self._projection_for_languages(languages)
-        hadith = self.repository.find_one_by_id(ObjectId(hadith_id), projection)
+        pipeline = self._build_get_by_id_pipeline(ObjectId(hadith_id), languages)
+
+        hadith = self.repository.find_one_with_lookup(pipeline)
+
         if hadith is None:
             raise HadithNotFoundError(hadith_id)
+
         return hadith
 
     def get_hadiths_paginated(

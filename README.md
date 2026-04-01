@@ -155,6 +155,7 @@ uv run ruff format .
 - Create a **better rate limit policy**
 - Integrate **Redis** for faster data retrieval
 - Add **unit tests** for core functionality
+- Refacto... 
 
 ### Development & Deployment
 
