@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import Depends, Path, Query
 from pymongo.database import Database
@@ -20,6 +20,10 @@ HadithIndexMinor = Annotated[
 ]
 BookHadithIndex = Annotated[int, Path(ge=1, description="Hadith index within the Book")]
 
+RandomSizeDepends = Annotated[
+    Literal["short", "medium", "long", "*"],
+    Query(description="The approximate length of the hadith", examples=["short"]),
+]
 
 """
 Objects

@@ -22,6 +22,7 @@ from src.modules.hadith.dependencies import (
     HadithIndex,
     HadithIndexMinor,
     HadithServiceDepends,
+    RandomSizeDepends,
 )
 from src.modules.hadith.dto.hadith_response import (
     HadithJoinedEditionAndBook,
@@ -55,6 +56,20 @@ def list_hadiths(
         filter_query=filter_query,
         languages=languages,
     )
+
+
+@hadith_router.get(
+    "/random",
+    response_model=HadithJoinedEditionAndBook,
+    responses={400: invalid_request_annotation()},
+)
+def get_one_random_hadith(
+    service: HadithServiceDepends,
+    lang: LanguageQuery = Language.en,
+    size: RandomSizeDepends = "short",
+    edition: EditionIdDepends = None,
+):
+    return service.get_random_hadith(lang, size=size, edition=edition)
 
 
 @hadith_router.get(

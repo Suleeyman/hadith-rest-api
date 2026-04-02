@@ -91,9 +91,10 @@ The name Hadislam combines Hadith and Islam, reflecting the project’s purpose:
 - `/editions/{slug}/books/{book_index}/hadiths` — List hadiths of an edition's book
 - `/editions/{slug}/books/{book_index}/hadiths/{book_hadith_index}` — Get one hadith (including his sub-hadith) by his relative numerical position inside the book
 
-#### Search
+#### Search & Random
 
 - `/hadiths/search?q=...` — Performs a full-text search on hadiths based on query `q`. English by default.
+- `/hadiths/random` — Returns a random hadith filterable by length or edition. English & Short hadith by default.
 
 ## Quick Start
 

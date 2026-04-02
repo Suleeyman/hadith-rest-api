@@ -266,6 +266,21 @@ class HadithService:
 
     # ----- GETS -----
 
+    def get_random_hadith(
+        self,
+        lang: str,
+        edition: PyObjectId | None,
+        size: str,
+    ):
+        result = self.repository.find_random_hadith(
+            lang=lang, edition=edition or None, size=size
+        )
+
+        if not result:
+            raise HadithNotFoundError("rand")
+
+        return result[0]
+
     def get_hadith_by_id(
         self, hadith_id: PyObjectId, languages: list[str]
     ) -> dict[str, Any]:
